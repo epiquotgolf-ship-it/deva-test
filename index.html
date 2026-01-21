@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Déva Pass — Prototype</title>
+  <style>
+    :root{
+      --white:#ffffff;
+      --lagon:#08B6C9;
+      --lagon-dark:#058A98;
+      --sun:#FFD23F;
+      --text:#0b1b20;
+      --muted:#5d737a;
+      --bg:#f6fbfc;
+      --card:#ffffff;
+      --border:rgba(11,27,32,.12);
+      --shadow:0 14px 34px rgba(11,27,32,.10);
+      --shadow-soft:0 12px 22px rgba(11,27,32,.07);
+      --radius:20px;
+      --radius2:26px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1000px 650px at 12% -10%, rgba(8,182,201,.22), transparent 60%),
+        radial-gradient(900px 520px at 92% 0%, rgba(255,210,63,.20), transparent 60%),
+        linear-gradient(180deg, #f9feff 0%, #f6fbfc 45%, #f6fbfc 100%);
+      overflow-x:hidden;
+    }
+
+    /* --- playful floating shapes --- */
+    .blob{
+      position:fixed; inset:auto auto 10% -120px;
+      width:340px; height:340px; border-radius:55% 45% 55% 45% / 55% 45% 55% 45%;
+      background: radial-gradient(circle at 30% 30%, rgba(8,182,201,.45), rgba(8,182,201,.10) 60%, transparent 70%);
+      filter: blur(1px);
+      pointer-events:none;
+      animation: floaty 9s ease-in-out infinite;
+      z-index:0;
+    }
+    .blob2{
+      position:fixed; inset: -120px -140px auto auto;
+      width:420px; height:420px; border-radius:48% 52% 45% 55% / 55% 40% 60% 45%;
+      background: radial-gradient(circle at 40% 30%, rgba(255,210,63,.55), rgba(255,210,63,.12) 60%, transparent 72%);
+      pointer-events:none;
+      animation: floaty2 10.5s ease-in-out infinite;
+      z-index:0;
+    }
+    @keyframes floaty{
+      0%,100%{transform:translate(0,0) rotate(0deg)}
+      50%{transform:translate(40px,-18px) rotate(10deg)}
+    }
+    @keyframes floaty2{
+      0%,100%{transform:translate(0,0) rotate(0deg)}
+      50%{transform:translate(-26px,20px) rotate(-8deg)}
+    }
+
+    a{color:inherit; text-decoration:none}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px; position:relative; z-index:1;}
+
+    /* --- topbar --- */
+    .topbar{
+      position:sticky;top:0;z-index:10;
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.78);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar .row{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:14px;padding:14px 18px;
+      max-width:1100px;margin:0 auto;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;
+      min-width: 240px;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:16px;
+      background: conic-gradient(from 220deg, var(--lagon), var(--sun), var(--lagon-dark), var(--lagon));
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(0,0,0,.06);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo::after{
+      content:"";
+      position:absolute; inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.65), transparent 40%);
+      transform: rotate(18deg);
+    }
+    .brand h1{margin:0;font-size:16px;line-height:1.1; letter-spacing:.2px}
+    .brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+
+    .cta{
+      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:9px 12px;border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 10px 18px rgba(11,27,32,.05);
+      font-size:13px;color:var(--muted);
+    }
+    .btn{
+      cursor:pointer;
+      border:1px solid rgba(0,0,0,.10);
+      padding:10px 14px;border-radius:999px;
+      background: linear-gradient(180deg, var(--lagon), var(--lagon-dark));
+      color:white;font-weight:800;
+      box-shadow: 0 14px 26px rgba(8,182,201,.24);
+      transition: transform .12s ease, filter .18s ease, box-shadow .18s ease;
+    }
+    .btn:hover{filter:brightness(1.03); box-shadow: 0 18px 36px rgba(8,182,201,.30)}
+    .btn:active{transform: translateY(1px)}
+    .btn.sun{
+      background: linear-gradient(180deg, rgba(255,210,63,.98), rgba(255,210,63,.78));
+      color:#3a2b00;
+      box-shadow: 0 14px 26px rgba(255,210,63,.25);
+    }
+    .btn.sun:hover{box-shadow: 0 18px 36px rgba(255,210,63,.30)}
+
+    /* --- tabs --- */
+    .tabs{
+      max-width:1100px;margin:0 auto;padding:0 18px 14px;
+      display:flex;gap:10px;flex-wrap:wrap;
+    }
+    .tab{
+      cursor:pointer;
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 10px 18px rgba(11,27,32,.05);
+      font-size:13px;
+      user-select:none;
+      transition: background .18s ease, transform .12s ease, box-shadow .18s ease;
+    }
+    .tab:hover{
+      background:#fff;
+      box-shadow: 0 12px 24px rgba(11,27,32,.07);
+      transform: translateY(-1px);
+    }
+    .tab:active{transform: translateY(0px)}
+    .tab.active{
+      background: linear-gradient(180deg, rgba(255,210,63,.95), rgba(255,210,63,.78));
+      border-color: rgba(255,210,63,.65);
+      color:#3a2b00;
+      font-weight:900;
+    }
+
+    /* --- toolbar --- */
+    .toolbar{
+      display:flex;gap:10px;flex-wrap:wrap;
+      margin:18px 0;
+    }
+    .search, .filter{
+      display:flex;align-items:center;gap:8px;
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:10px 12px;
+      box-shadow: 0 12px 22px rgba(11,27,32,.05);
+    }
+    input[type="search"]{
+      border:none;outline:none;
+      width:min(520px, 70vw);
+      font-size:14px;background:transparent;
+    }
+    select{
+      border:none;outline:none;background:transparent;
+      font-size:14px;color:var(--text);
+    }
+    .ghost{
+      cursor:pointer;
+      border:1px solid var(--border);
+      padding:10px 12px;border-radius:999px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 12px 22px rgba(11,27,32,.05);
+      font-weight:800;
+      transition: transform .12s ease;
+    }
+    .ghost:hover{transform: translateY(-1px)}
+    .ghost:active{transform: translateY(0px)}
+
+    /* --- content cards --- */
+    .hero{
+      display:grid;gap:14px;
+      grid-template-columns: 1.6fr 1fr;
+      align-items:stretch;
+    }
+    @media (max-width: 900px){
+      .hero{grid-template-columns: 1fr;}
+      input[type="search"]{width: 100%;}
+    }
+
+    .card{
+      background: rgba(255,255,255,.92);
+      border:1px solid var(--border);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      padding:16px;
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-1px;
+      background: radial-gradient(520px 240px at 20% 0%, rgba(8,182,201,.16), transparent 60%),
+                  radial-gradient(520px 240px at 90% 0%, rgba(255,210,63,.16), transparent 60%);
+      pointer-events:none;
+    }
+    .card > *{position:relative}
+    .card h2{margin:0 0 8px;font-size:18px}
+    .card p{margin:0;color:var(--muted);line-height:1.5}
+
+    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--border);
+      border-radius:999px;padding:7px 10px;
+      font-size:12px;background: rgba(8,182,201,.10);
+    }
+    .badge.sun{background: rgba(255,210,63,.22);border-color: rgba(255,210,63,.55)}
+    .badge.white{background: rgba(255,255,255,.95)}
+
+    /* Quick actions */
+    .quick-actions{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 900px){
+      .quick-actions{grid-template-columns: repeat(2, 1fr);}
+    }
+    .qa{
+      cursor:pointer;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius: 18px;
+      padding:12px 12px;
+      background: rgba(255,255,255,.90);
+      box-shadow: 0 12px 22px rgba(11,27,32,.05);
+      transition: transform .14s ease, box-shadow .18s ease, filter .18s ease;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .qa:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 34px rgba(11,27,32,.10);
+      filter: brightness(1.01);
+    }
+    .qa:active{transform: translateY(0px)}
+    .qa .left{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .qa .t{font-weight:900}
+    .qa .d{font-size:12px; color:var(--muted)}
+    .qa .emoji{
+      width:40px; height:40px; border-radius:14px;
+      display:grid; place-items:center;
+      background: linear-gradient(180deg, rgba(8,182,201,.18), rgba(255,255,255,.65));
+      border:1px solid rgba(8,182,201,.20);
+      font-size:18px;
+    }
+    .qa.sun .emoji{
+      background: linear-gradient(180deg, rgba(255,210,63,.35), rgba(255,255,255,.65));
+      border-color: rgba(255,210,63,.45);
+    }
+
+    .grid{
+      display:grid;gap:12px;
+      grid-template-columns: repeat(3, 1fr);
+      margin-top:14px;
+    }
+    @media (max-width: 980px){.grid{grid-template-columns: repeat(2, 1fr)}}
+    @media (max-width: 640px){.grid{grid-template-columns: 1fr}}
+
+    .item{
+      background: rgba(255,255,255,.92);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding:14px;
+      box-shadow: var(--shadow-soft);
+      display:flex;flex-direction:column;gap:10px;
+      transition: transform .14s ease, box-shadow .18s ease;
+    }
+    .item:hover{transform: translateY(-2px); box-shadow: 0 18px 34px rgba(11,27,32,.10)}
+    .item-head{
+      display:flex;justify-content:space-between;gap:12px;
+    }
+    .title{font-weight:1000; letter-spacing:.2px}
+    .meta{color:var(--muted);font-size:13px;line-height:1.35}
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{
+      font-size:12px;
+      padding:6px 9px;border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.85);
+    }
+    .chip.lagon{background: rgba(8,182,201,.12)}
+    .chip.sun{background: rgba(255,210,63,.20);border-color: rgba(255,210,63,.6)}
+    .right{
+      text-align:right;
+      font-size:12px;
+      color:var(--muted);
+      white-space:pre-line;
+    }
+
+    .mini-actions{
+      margin-top:2px;
+      display:flex; gap:8px; flex-wrap:wrap;
+    }
+    .mini-btn{
+      cursor:pointer;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.94);
+      font-weight:900;
+      font-size:12px;
+      transition: transform .12s ease;
+    }
+    .mini-btn:hover{transform: translateY(-1px)}
+    .mini-btn.lagon{
+      background: rgba(8,182,201,.12);
+      border-color: rgba(8,182,201,.30);
+    }
+    .mini-btn.sun{
+      background: rgba(255,210,63,.22);
+      border-color: rgba(255,210,63,.55);
+      color:#3a2b00;
+    }
+
+    .footer{
+      margin:22px 0 8px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
+    .hidden{display:none}
+
+    /* --- modal --- */
+    .modal-backdrop{
+      position:fixed; inset:0;
+      background: rgba(6,14,18,.55);
+      display:none;
+      align-items:center; justify-content:center;
+      padding:18px;
+      z-index:100;
+    }
+    .modal-backdrop.show{display:flex}
+    .modal{
+      width:min(1050px, 100%);
+      background: rgba(255,255,255,.96);
+      border:1px solid rgba(255,255,255,.22);
+      border-radius: 26px;
+      box-shadow: 0 28px 80px rgba(0,0,0,.35);
+      overflow:hidden;
+      transform: translateY(8px);
+      animation: pop .18s ease-out forwards;
+    }
+    @keyframes pop{
+      to{transform: translateY(0px)}
+    }
+    .modal-top{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:14px 14px 10px;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      background: radial-gradient(700px 240px at 15% 0%, rgba(8,182,201,.18), transparent 60%),
+                  radial-gradient(700px 240px at 95% 0%, rgba(255,210,63,.18), transparent 60%),
+                  rgba(255,255,255,.96);
+    }
+    .modal-top .h{
+      font-weight:1000;
+    }
+    .close{
+      cursor:pointer;
+      border:1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.95);
+      border-radius: 999px;
+      padding:10px 12px;
+      font-weight:1000;
+    }
+    .modal-body{
+      display:grid;
+      grid-template-columns: 1.4fr .9fr;
+      gap:0;
+      min-height: 70vh;
+    }
+    @media (max-width: 900px){
+      .modal-body{grid-template-columns: 1fr; min-height: 75vh;}
+    }
+    .modal-left{
+      padding:0;
+      border-right: 1px solid rgba(0,0,0,.08);
+    }
+    .modal-right{
+      padding:14px;
+    }
+    .pdf{
+      width:100%;
+      height:100%;
+      min-height:70vh;
+      border:0;
+      background:#fff;
+    }
+    .links{
+      display:flex; flex-direction:column; gap:10px;
+      margin-top:10px;
+    }
+    .linkcard{
+      border:1px solid rgba(0,0,0,.10);
+      border-radius:18px;
+      padding:12px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 12px 22px rgba(11,27,32,.06);
+    }
+    .linkcard .tt{font-weight:1000}
+    .linkcard .dd{font-size:12px; color:var(--muted); margin-top:3px}
+    .linkcard a{
+      display:inline-flex; align-items:center; gap:8px;
+      margin-top:8px;
+      font-weight:1000;
+      color: var(--lagon-dark);
+    }
+  </style>
+</head>
+<body>
+  <div class="blob" aria-hidden="true"></div>
+  <div class="blob2" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="row">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Déva Pass — Prototype</h1>
+          <p>Activités • Sheraton • Golf • Agenda • Bourail</p>
+        </div>
+      </div>
+      <div class="cta">
+        <div class="pill">📍 Domaine de Déva • Bourail • NC</div>
+        <button class="btn" onclick="scrollToSection('content')">Explorer</button>
+        <button class="btn sun" onclick="openDevaMap()">Plan Déva</button>
+      </div>
+    </div>
+
+    <nav class="tabs" aria-label="Navigation">
+      <div class="tab active" data-tab="home">🏝️ Accueil</div>
+      <div class="tab" data-tab="activities">🥾 Activités</div>
+      <div class="tab" data-tab="sheraton">🏨 Sheraton</div>
+      <div class="tab" data-tab="golf">⛳ Golf</div>
+      <div class="tab" data-tab="agenda">📅 Agenda</div>
+      <div class="tab" data-tab="map">🗺️ Carte</div>
+    </nav>
+  </header>
+
+  <main class="wrap" id="content">
+
+    <!-- Toolbar (visible on Activities + Agenda) -->
+    <div class="toolbar hidden" id="toolbar">
+      <div class="search">
+        🔎
+        <input id="q" type="search" placeholder="Rechercher une activité, un tournoi, un concert…" />
+      </div>
+      <div class="filter">
+        🏷️
+        <select id="tag">
+          <option value="">Tous</option>
+        </select>
+      </div>
+      <button class="ghost" id="reset">Réinitialiser</button>
+    </div>
+
+    <!-- HOME -->
+    <section class="page" id="page-home">
+      <div class="hero">
+        <div class="card">
+          <h2>Tout Déva & Bourail dans une seule app ✨</h2>
+          <p>
+            Un prototype “touriste-friendly” : <b>activités nature</b>, <b>offres Sheraton</b>,
+            <b>golf & compétitions</b>, <b>concerts</b> et <b>agenda</b>.
+          </p>
+
+          <div class="badges">
+            <span class="badge">🌊 Bleu lagon</span>
+            <span class="badge sun">☀️ Jaune soleil</span>
+            <span class="badge white">🤍 Fond blanc</span>
+          </div>
+
+          <!-- QUICK ACTIONS -->
+          <div class="quick-actions">
+            <button class="qa" onclick="openDevaMap()">
+              <div class="left">
+                <div class="t">Randonnée</div>
+                <div class="d">Ouvrir le plan Déva</div>
+              </div>
+              <div class="emoji">🥾</div>
+            </button>
+
+            <button class="qa sun" onclick="openGolfSite()">
+              <div class="left">
+                <div class="t">Golf de Déva</div>
+                <div class="d">Site officiel</div>
+              </div>
+              <div class="emoji">⛳</div>
+            </button>
+
+            <button class="qa" onclick="openSheratonSite()">
+              <div class="left">
+                <div class="t">Sheraton</div>
+                <div class="d">Site officiel</div>
+              </div>
+              <div class="emoji">🏨</div>
+            </button>
+
+            <button class="qa sun" onclick="goToTab('agenda')">
+              <div class="left">
+                <div class="t">Ce soir</div>
+                <div class="d">Concerts & events</div>
+              </div>
+              <div class="emoji">🎵</div>
+            </button>
+          </div>
+
+          <div class="grid" style="margin-top:14px">
+            <div class="item">
+              <div class="title">Activités nature</div>
+              <div class="meta">Rando, VTT, cheval, mer…</div>
+              <div class="mini-actions">
+                <button class="mini-btn lagon" onclick="goToTab('activities')">Voir activités</button>
+                <button class="mini-btn sun" onclick="openDevaMap()">Plan Déva</button>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="title">Offres Sheraton</div>
+              <div class="meta">Séjours, spa, restaurants…</div>
+              <div class="mini-actions">
+                <button class="mini-btn lagon" onclick="goToTab('sheraton')">Voir section</button>
+                <button class="mini-btn sun" onclick="openSheratonSite()">Aller au site</button>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="title">Golf & compétitions</div>
+              <div class="meta">Tournois, formats, calendrier…</div>
+              <div class="mini-actions">
+                <button class="mini-btn lagon" onclick="goToTab('golf')">Voir tournois</button>
+                <button class="mini-btn sun" onclick="openGolfSite()">Site golf</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>“Aujourd’hui à Déva”</h2>
+          <p>Une idée de panneau utile aux touristes (à connecter ensuite à un vrai agenda).</p>
+
+          <div class="item" style="margin-top:12px">
+            <div class="item-head">
+              <div>
+                <div class="title">Suggestion du jour</div>
+                <div class="meta">Plage + coucher de soleil</div>
+              </div>
+              <div class="right">🕒 16:30–19:00</div>
+            </div>
+            <div class="chips">
+              <span class="chip sun">sunset</span>
+              <span class="chip lagon">lagon</span>
+              <span class="chip">photo</span>
+            </div>
+            <div class="mini-actions">
+              <button class="mini-btn lagon" onclick="goToTab('map')">Voir carte</button>
+              <button class="mini-btn sun" onclick="goToTab('agenda')">Voir agenda</button>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="item-head">
+              <div>
+                <div class="title">Petit plus</div>
+                <div class="meta">Spa / détente (si dispo)</div>
+              </div>
+              <div class="right">🕒 14:00</div>
+            </div>
+            <div class="chips">
+              <span class="chip sun">spa</span>
+              <span class="chip">relax</span>
+            </div>
+            <div class="mini-actions">
+              <button class="mini-btn sun" onclick="openSheratonSite()">Sheraton</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIVITIES -->
+    <section class="page hidden" id="page-activities">
+      <div class="card">
+        <h2>Activités — Domaine de Déva</h2>
+        <p>Filtre et recherche pour construire ton programme. Bonus : bouton “Plan Déva”.</p>
+        <div class="mini-actions" style="margin-top:10px">
+          <button class="mini-btn sun" onclick="openDevaMap()">🥾 Plan détaillé Déva</button>
+          <button class="mini-btn lagon" onclick="goToTab('map')">🗺️ Carte points utiles</button>
+        </div>
+      </div>
+      <div class="grid" id="list-activities"></div>
+    </section>
+
+    <!-- SHERATON -->
+    <section class="page hidden" id="page-sheraton">
+      <div class="grid">
+        <div class="card">
+          <h2>Sheraton Déva</h2>
+          <p>Expériences, services et idées d’offres (exemples).</p>
+          <div class="mini-actions" style="margin-top:10px">
+            <button class="mini-btn sun" onclick="openSheratonSite()">🏨 Ouvrir le site Sheraton</button>
+          </div>
+
+          <div class="item" style="margin-top:12px">
+            <div class="item-head">
+              <div>
+                <div class="title">Expériences nature</div>
+                <div class="meta">Base idéale pour rando/VTT/cheval.</div>
+              </div>
+              <div class="right">🌿</div>
+            </div>
+            <div class="chips">
+              <span class="chip lagon">nature</span>
+              <span class="chip">famille</span>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="item-head">
+              <div>
+                <div class="title">Spa & détente</div>
+                <div class="meta">Soins / bien-être (selon dispo).</div>
+              </div>
+              <div class="right">🧖</div>
+            </div>
+            <div class="chips">
+              <span class="chip sun">spa</span>
+              <span class="chip">relax</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Offres / Packages (à compléter)</h2>
+          <p>Tu pourras remplacer ces exemples par tes vraies offres.</p>
+          <div class="grid" style="grid-template-columns:1fr; margin-top:12px" id="list-offers"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GOLF -->
+    <section class="page hidden" id="page-golf">
+      <div class="grid">
+        <div class="card">
+          <h2>Golf de Déva</h2>
+          <p>Infos rapides + compétitions (exemples).</p>
+          <div class="mini-actions" style="margin-top:10px">
+            <button class="mini-btn sun" onclick="openGolfSite()">⛳ Ouvrir le site du Golf</button>
+          </div>
+
+          <div class="item" style="margin-top:12px">
+            <div class="item-head">
+              <div>
+                <div class="title">Infos</div>
+                <div class="meta">Réservation / pro-shop (à renseigner)</div>
+              </div>
+              <div class="right">⛳</div>
+            </div>
+            <div class="chips">
+              <span class="chip lagon">green-fee</span>
+              <span class="chip">pro-shop</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Compétitions</h2>
+          <p>Calendrier simplifié (à connecter à un vrai agenda).</p>
+          <div class="grid" style="grid-template-columns:1fr; margin-top:12px" id="list-golf"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AGENDA -->
+    <section class="page hidden" id="page-agenda">
+      <div class="card">
+        <h2>Agenda — Déva & Bourail</h2>
+        <p>Concerts, animations, événements. (Tu pourras ensuite connecter un Google Calendar.)</p>
+      </div>
+      <div class="grid" id="list-agenda"></div>
+    </section>
+
+    <!-- MAP -->
+    <section class="page hidden" id="page-map">
+      <div class="grid">
+        <div class="card">
+          <h2>Carte (version simple)</h2>
+          <p>Points utiles + lien Google Maps. (Coordonnées à remplacer par les tiennes.)</p>
+          <div class="mini-actions" style="margin-top:10px">
+            <button class="mini-btn sun" onclick="openDevaMap()">🗺️ Plan Déva (sentiers)</button>
+          </div>
+          <div class="grid" style="grid-template-columns:1fr; margin-top:12px" id="list-map"></div>
+        </div>
+        <div class="card">
+          <h2>Idées “ludiques” à ajouter</h2>
+          <p>Mini défis, badges, favoris, “Mon programme”, et notifications “Ce soir”.</p>
+          <div class="badges">
+            <span class="badge">🏅 Badges sentiers</span>
+            <span class="badge sun">🎵 Alertes concerts</span>
+            <span class="badge">⭐ Favoris</span>
+            <span class="badge sun">🗓️ Mon planning</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      Prototype 1 fichier • Boutons externes + plan Déva en popup • Couleurs blanc / bleu lagon / jaune
+    </div>
+  </main>
+
+  <!-- MODAL: Plan Déva -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-label="Plan détaillé Domaine de Déva">
+    <div class="modal">
+      <div class="modal-top">
+        <div class="h">🗺️ Plan détaillé — Domaine de Déva</div>
+        <button class="close" onclick="closeModal()">Fermer ✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-left">
+          <!-- PDF intégré (plan Déva) -->
+          <iframe class="pdf" id="mapFrame" title="Plan Domaine de Déva (PDF)"></iframe>
+        </div>
+
+        <div class="modal-right">
+          <div style="font-weight:1000; font-size:14px;">Liens rapides</div>
+          <div style="color:var(--muted); font-size:12px; margin-top:4px;">
+            Si le PDF ne s’affiche pas sur ton navigateur, utilise “Ouvrir le PDF”.
+          </div>
+
+          <div class="links">
+            <div class="linkcard">
+              <div class="tt">🥾 Ouvrir le PDF du plan</div>
+              <div class="dd">Le plan s’ouvre dans un nouvel onglet.</div>
+              <a id="pdfLink" href="#" target="_blank" rel="noreferrer">Ouvrir →</a>
+            </div>
+
+            <div class="linkcard">
+              <div class="tt">🌿 Infos Domaine de Déva</div>
+              <div class="dd">Page destination (activités, description).</div>
+              <a href="https://www.nouvellecaledonie.travel/destination/cote-ouest/domaine-de-deva/" target="_blank" rel="noreferrer">Ouvrir →</a>
+            </div>
+
+            <div class="linkcard">
+              <div class="tt">⛳ Golf de Déva</div>
+              <div class="dd">Site du golf (événements, infos).</div>
+              <a href="https://fr.exclusivgolf-deva.com/" target="_blank" rel="noreferrer">Ouvrir →</a>
+            </div>
+
+            <div class="linkcard">
+              <div class="tt">🏨 Sheraton Déva</div>
+              <div class="dd">Site officiel Marriott.</div>
+              <a href="https://www.marriott.com/fr/hotels/nousi-sheraton-new-caledonia-deva-spa-and-golf-resort/overview/" target="_blank" rel="noreferrer">Ouvrir →</a>
+            </div>
+          </div>
+
+          <div style="margin-top:12px; font-size:12px; color:var(--muted);">
+            Astuce : tu peux remplacer le PDF par un autre plan (image, autre PDF, Google MyMaps…).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- URLs (tu peux changer ici si besoin) ---
+    const URLS = {
+      SHERATON: "https://www.marriott.com/fr/hotels/nousi-sheraton-new-caledonia-deva-spa-and-golf-resort/overview/",
+      GOLF: "https://fr.exclusivgolf-deva.com/",
+      DEVA_INFO: "https://www.nouvellecaledonie.travel/destination/cote-ouest/domaine-de-deva/",
+      DEVA_MAP_PDF: "https://www.unjourencaledonie.com/wp-content/uploads/2017/09/domaine_de_deva.pdf"
+    };
+
+    // ---- DONNÉES (tu peux modifier ici) ----
+    const data = {
+      activities: [
+        {
+          id:"a1",
+          title:"Sentiers de randonnée",
+          meta:"Domaine de Déva — vues & nature",
+          right:"⏱️ 1h–4h",
+          tags:["rando","vue"],
+          actions:[
+            {label:"Plan Déva", type:"modal", emoji:"🗺️"},
+            {label:"Infos Déva", type:"link", url: URLS.DEVA_INFO, emoji:"🌿"}
+          ]
+        },
+        {
+          id:"a2",
+          title:"Boucles VTT",
+          meta:"Parcours VTT balisés",
+          right:"⏱️ 30 min–3h",
+          tags:["vtt","sport"],
+          actions:[
+            {label:"Infos Déva", type:"link", url: URLS.DEVA_INFO, emoji:"🌿"}
+          ]
+        },
+        {
+          id:"a3",
+          title:"Balade à cheval",
+          meta:"Découverte brousse & grand espace",
+          right:"⏱️ 1h–2h",
+          tags:["cheval","brousse"],
+          actions:[
+            {label:"Infos Déva", type:"link", url: URLS.DEVA_INFO, emoji:"🌿"}
+          ]
+        },
+        {
+          id:"a4",
+          title:"Plage & lagon",
+          meta:"Déva — baignade / détente",
+          right:"⏱️ libre",
+          tags:["plage","lagon"],
+          actions:[
+            {label:"Carte", type:"tab", tab:"map", emoji:"🗺️"}
+          ]
+        },
+      ],
+      offers: [
+        {
+          id:"o1",
+          title:"Offre séjour (exemple)",
+          meta:"Nuit + petit-déj (à préciser)",
+          right:"⭐ Sheraton",
+          tags:["séjour","famille"],
+          actions:[
+            {label:"Site Sheraton", type:"link", url: URLS.SHERATON, emoji:"🏨"}
+          ]
+        },
+        {
+          id:"o2",
+          title:"Spa / bien-être (exemple)",
+          meta:"Soins & détente (selon dispo)",
+          right:"🧖 Spa",
+          tags:["spa","relax"],
+          actions:[
+            {label:"Site Sheraton", type:"link", url: URLS.SHERATON, emoji:"🏨"}
+          ]
+        },
+      ],
+      golf: [
+        {
+          id:"g1",
+          title:"Tournoi du week-end (exemple)",
+          meta:"Format à confirmer • Golf de Déva",
+          right:"📅 Sam 07:30",
+          tags:["tournoi","golf"],
+          actions:[
+            {label:"Site Golf", type:"link", url: URLS.GOLF, emoji:"⛳"}
+          ]
+        },
+        {
+          id:"g2",
+          title:"Compétition mensuelle (exemple)",
+          meta:"Open / Stableford (à confirmer)",
+          right:"📅 Dim 08:00",
+          tags:["golf","open"],
+          actions:[
+            {label:"Site Golf", type:"link", url: URLS.GOLF, emoji:"⛳"}
+          ]
+        },
+      ],
+      agenda: [
+        {
+          id:"e1",
+          title:"Concert / Festival (exemple)",
+          meta:"Bourail — soirée musique",
+          right:"🎵 19:00",
+          tags:["concert","bourail"],
+          actions:[
+            {label:"Voir carte", type:"tab", tab:"map", emoji:"🗺️"}
+          ]
+        },
+        {
+          id:"e2",
+          title:"Animation marché (exemple)",
+          meta:"Bourail — artisanal / local",
+          right:"🛍️ 08:00",
+          tags:["local","famille"],
+          actions:[
+            {label:"Voir carte", type:"tab", tab:"map", emoji:"🗺️"}
+          ]
+        },
+      ],
+      map: [
+        { id:"m1", title:"Sheraton Déva", meta:"Resort / services", right:"📍 Ouvrir Maps", lat:-21.585, lng:165.462, tags:["hotel"], actions:[{label:"Site", type:"link", url: URLS.SHERATON, emoji:"🏨"}] },
+        { id:"m2", title:"Golf de Déva", meta:"Compétitions / pro-shop", right:"📍 Ouvrir Maps", lat:-21.58, lng:165.47, tags:["golf"], actions:[{label:"Site", type:"link", url: URLS.GOLF, emoji:"⛳"}] },
+        { id:"m3", title:"Bourail (centre)", meta:"Commerces / événements", right:"📍 Ouvrir Maps", lat:-21.57, lng:165.49, tags:["bourail"], actions:[] },
+      ]
+    };
+
+    // ---- UI helpers ----
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    function scrollToSection(id){
+      document.getElementById(id).scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function uniqueTags(){
+      const s = new Set();
+      ["activities","offers","golf","agenda","map"].forEach(k=>{
+        data[k].forEach(item => (item.tags||[]).forEach(t=>s.add(t)));
+      });
+      return Array.from(s).sort((a,b)=>a.localeCompare(b));
+    }
+
+    function chipClass(t){
+      if (["lagon","plage","rando","vtt","golf","vue"].includes(t)) return "chip lagon";
+      if (["spa","concert","sunset","séjour"].includes(t)) return "chip sun";
+      return "chip";
+    }
+
+    // --- Navigation actions ---
+    function goToTab(tab){
+      setActiveTab(tab);
+      scrollToSection("content");
+    }
+    function openSheratonSite(){ window.open(URLS.SHERATON, "_blank", "noopener,noreferrer"); }
+    function openGolfSite(){ window.open(URLS.GOLF, "_blank", "noopener,noreferrer"); }
+
+    // --- Modal map ---
+    function openDevaMap(){
+      const frame = $("#mapFrame");
+      const pdfLink = $("#pdfLink");
+      frame.src = URLS.DEVA_MAP_PDF;
+      pdfLink.href = URLS.DEVA_MAP_PDF;
+      $("#modalBackdrop").classList.add("show");
+    }
+    function closeModal(){
+      $("#modalBackdrop").classList.remove("show");
+      // Optionnel: vider src pour éviter audio/charge
+      $("#mapFrame").src = "";
+    }
+    // Fermer modal en cliquant sur le fond
+    $("#modalBackdrop")?.addEventListener("click", (e)=>{
+      if(e.target.id === "modalBackdrop") closeModal();
+    });
+    // Fermer modal avec ESC
+    window.addEventListener("keydown", (e)=>{
+      if(e.key === "Escape") closeModal();
+    });
+
+    // --- Render list with optional action buttons ---
+    function renderList(containerId, items, withMapLink=false){
+      const el = $(containerId);
+      el.innerHTML = "";
+      items.forEach(it=>{
+        const wrap = document.createElement("div");
+        wrap.className = "item";
+
+        const head = document.createElement("div");
+        head.className = "item-head";
+
+        const left = document.createElement("div");
+        left.innerHTML = `<div class="title">${it.title}</div><div class="meta">${it.meta}</div>`;
+
+        const right = document.createElement("div");
+        right.className = "right";
+        right.textContent = it.right || "";
+
+        head.appendChild(left);
+        head.appendChild(right);
+
+        const chips = document.createElement("div");
+        chips.className = "chips";
+        (it.tags||[]).forEach(t=>{
+          const c = document.createElement("span");
+          c.className = chipClass(t);
+          c.textContent = t;
+          chips.appendChild(c);
+        });
+
+        wrap.appendChild(head);
+        wrap.appendChild(chips);
+
+        // action buttons (Plan / Sites / Tabs)
+        if(it.actions && it.actions.length){
+          const actions = document.createElement("div");
+          actions.className = "mini-actions";
+
+          it.actions.forEach(a=>{
+            const b = document.createElement("button");
+            b.className = "mini-btn " + (a.type === "modal" ? "sun" : "lagon");
+            b.textContent = `${a.emoji ? a.emoji + " " : ""}${a.label}`;
+            b.addEventListener("click", ()=>{
+              if(a.type === "modal") openDevaMap();
+              if(a.type === "link") window.open(a.url, "_blank", "noopener,noreferrer");
+              if(a.type === "tab") goToTab(a.tab);
+            });
+            actions.appendChild(b);
+          });
+
+          wrap.appendChild(actions);
+        }
+
+        if(withMapLink && typeof it.lat==="number" && typeof it.lng==="number"){
+          const a = document.createElement("a");
+          a.href = `https://www.google.com/maps?q=${it.lat},${it.lng}`;
+          a.target = "_blank";
+          a.rel = "noreferrer";
+          a.style.marginTop = "6px";
+          a.style.fontSize = "13px";
+          a.style.color = "var(--lagon-dark)";
+          a.style.fontWeight = "1000";
+          a.textContent = "Ouvrir l’itinéraire →";
+          wrap.appendChild(a);
+        }
+
+        el.appendChild(wrap);
+      });
+
+      if(!items.length){
+        el.innerHTML = `<div class="card"><h2>Rien à afficher</h2><p>Change la recherche ou le filtre.</p></div>`;
+      }
+    }
+
+    function setActiveTab(tab){
+      $$(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+      $$(".page").forEach(p => p.classList.add("hidden"));
+      $("#page-" + tab).classList.remove("hidden");
+
+      const showToolbar = (tab === "activities" || tab === "agenda");
+      $("#toolbar").classList.toggle("hidden", !showToolbar);
+
+      $("#q").value = "";
+      $("#tag").value = "";
+      applyFilters(tab);
+    }
+
+    function applyFilters(tab){
+      const q = ($("#q").value || "").trim().toLowerCase();
+      const tag = $("#tag").value;
+
+      const filter = (arr) => arr.filter(it=>{
+        const hay = (it.title + " " + it.meta + " " + ((it.tags||[]).join(" "))).toLowerCase();
+        const okQ = !q || hay.includes(q);
+        const okT = !tag || (it.tags||[]).includes(tag);
+        return okQ && okT;
+      });
+
+      if(tab === "activities") renderList("#list-activities", filter(data.activities));
+      if(tab === "agenda") renderList("#list-agenda", filter(data.agenda));
+    }
+
+    // ---- INIT ----
+    function init(){
+      // Fill tag dropdown
+      const tags = uniqueTags();
+      const select = $("#tag");
+      tags.forEach(t=>{
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        select.appendChild(opt);
+      });
+
+      // Render static sections
+      renderList("#list-offers", data.offers);
+      renderList("#list-golf", data.golf);
+      renderList("#list-map", data.map, true);
+
+      // Tabs
+      $$(".tab").forEach(t=>{
+        t.addEventListener("click", ()=> setActiveTab(t.dataset.tab));
+      });
+
+      // Search/filter
+      $("#q").addEventListener("input", ()=> applyFilters(getCurrentTab()));
+      $("#tag").addEventListener("change", ()=> applyFilters(getCurrentTab()));
+      $("#reset").addEventListener("click", ()=>{
+        $("#q").value = "";
+        $("#tag").value = "";
+        applyFilters(getCurrentTab());
+      });
+
+      setActiveTab("home");
+    }
+
+    function getCurrentTab(){
+      const active = $$(".tab").find(t => t.classList.contains("active"));
+      return active ? active.dataset.tab : "home";
+    }
+
+    init();
+  </script>
+</body>
+</html>
